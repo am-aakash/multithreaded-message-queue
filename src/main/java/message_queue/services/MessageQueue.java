@@ -20,7 +20,9 @@ public class MessageQueue {
   public Topic createTopic(@NonNull final String topicName) {
     final Topic topic = new Topic(UUID.randomUUID().toString(), topicName);
     TopicService service = new TopicService(topic);
+    // add new topic and service to topic processors map
     topicProcessors.put(topic.getTopicId(), service);
+
     System.out.println("Created topic: " + topic.getTopicName());
     return topic;
   }
@@ -31,8 +33,14 @@ public class MessageQueue {
   }
 
   public void publish(@NonNull final Topic topic, @NonNull final Message message) {
+    // synchronized call to add message for the topic
     topic.addMessage(message);
-    System.out.println(message.getMessageString() + " published to topic: " + topic.getTopicName());
+
+    System.out.println(topic.getTopicName() + " topic published message: " + message.getMessageString());
+
+    // call publish() of the Topic service,
+    // which notifies the SubscriberWorker to wake up
+    // as the SubscriberWorker was waiting for its topic to produce something
     new Thread(() -> topicProcessors.get(topic.getTopicId()).publish()).start();
   }
 }

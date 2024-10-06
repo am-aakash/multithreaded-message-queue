@@ -33,7 +33,6 @@ public class SubscriberWorker implements Runnable {
           // completes and notifiesAll()
           topicSubscriber.wait();
         }
-
         Message message = topic.getMessages().get(curOffset);
         topicSubscriber.getSubscriber().consume(message);
 
